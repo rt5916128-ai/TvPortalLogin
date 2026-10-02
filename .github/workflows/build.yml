@@ -9,15 +9,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+
+      - name: Проверка файлов
+        run: |
+          ls -la
+          if [ ! -f app/build.gradle ]; then
+            echo "::error::Нет папки app (или файла app/build.gradle). Загрузите папку app в репозиторий."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+
       - uses: android-actions/setup-android@v3
-      - name: Build
-        run: |
-          chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Сборка APK
+        run: gradle --no-daemon assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
           name: TvPortalLogin-apk
